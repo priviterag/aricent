@@ -1,4 +1,13 @@
 ----------------------------------------------
+git version control system http://git-scm.com/
+----------------------------------------------
+openSUSE
+$ sudo zypper install git-core
+
+Ubuntu
+$ sudo apt-get install git-core
+
+----------------------------------------------
 development server:
 ----------------------------------------------
 openSUSE 11.2
@@ -36,13 +45,30 @@ e.g.: export CLASSPATH=$CLASSPATH:/opt/aricent/libs/appserv-admin-2.1.jar:/opt/a
 ----------------------------------------------
 Configuration
 ----------------------------------------------
-edit server_configuration.rb and change thr constants according your environment (do not touch METHODS)
+to change the default values, edit server_configuration.rb (do not touch METHODS)
 NAMESPACE = 'urn:AricentServer'
 HOST = 'localhost' # webservice host
 PORT = 2000 # webservice port
 VISHOST = HOST # Visionael NRM10 server
 VISPORT = 3700 # Visionael NRM10 server port
 
+METHODS=[
+	%w(find_device name),
+	%w(check_in user_id date serial_number part_number vendor_part_number depot_string asset_tag facebook_part_number),
+	%w(check_out user_id date serial_number part_number vendor_part_number depot_string asset_tag facebook_part_number failed_part_rma),
+	%w(capture_failed_part user_id date serial_number part_number vendor_part_number depot_string asset_tag facebook_part_number rma parent_serial_number parent_asset_tag),
+	%w(rma user_id date serial_number part_number vendor_part_number depot_string asset_tag facebook_part_number rma carrier_name carrier_traking_number)
+]
+
+----------------------------------------------
+Test
+----------------------------------------------
+$ cd aricent
+$ ./server.rb #start the webservice
+
+$ ./client_find_device 'Cisco 12410 Router' # this one is in the sample nmr10 repository
+
+$ ./client_stubs.rb # call the stubs methods defined in the nrm8 version of the application
 
 
 
