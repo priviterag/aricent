@@ -62,7 +62,7 @@ class AricentServer < SOAP::RPC::StandaloneServer
 end
 
 begin
-	server = AricentServer.new("AricentServer", NAMESPACE, HOST, PORT)
+	server = AricentServer.new("AricentServer", NAMESPACE, '0.0.0.0', PORT)
   trap(:INT){ server.shutdown }
   server.start
 rescue => err
