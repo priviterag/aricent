@@ -1,0 +1,28 @@
+----------------------------------------------
+development server
+----------------------------------------------
+openSUSE 11.2
+
+peppe@linux-1bgn:~> uname -a
+Linux linux-1bgn 2.6.31.5-0.1-desktop #1 SMP PREEMPT 2009-10-26 15:49:03 +0100 x86_64 x86_64 x86_64 GNU/Linux
+peppe@linux-1bgn:~> java -version
+java version "1.6.0_23"
+Java(TM) SE Runtime Environment (build 1.6.0_23-b05)
+Java HotSpot(TM) 64-Bit Server VM (build 19.0-b09, mixed mode)
+peppe@linux-1bgn:~> jruby -v
+jruby 1.6.0.RC1 (ruby 1.8.7 patchlevel 330) (2011-01-10 769f847) (Java HotSpot(TM) 64-Bit Server VM 1.6.0_23) [linux-amd64-java]
+
+----------------------------------------------
+Prerequisites:
+----------------------------------------------
+1) Visionael NRM (tested on Version: 10.3.0-SNAPSHOT)
+
+2) java
+
+3) jruby - http://www.jruby.org/getting-started
+easy install; download the binaries, unpack and update your $PATH
+
+4) soap4r - implements SOAP 1.1
+$ sudo jruby -S gem install soap4r
+
+
