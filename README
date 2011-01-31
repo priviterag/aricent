@@ -66,9 +66,9 @@ Test
 $ cd aricent
 $ ./server.rb #start the webservice
 
-$ ./client_find_device 'Cisco 12410 Router' # this one is in the sample nmr10 repository
+$ ./client_find_device 'Cisco 12410 Router' # this device is in the nmr10 sample repository
 
-$ ./client_stubs.rb # call the stubs methods defined in the nrm8 version of the application
+$ ./client_stubs.rb # call the stubs methods defined in the nrm8 version of the facebook application
 
 
 
