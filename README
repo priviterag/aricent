@@ -33,6 +33,16 @@ $ git clone git://github.com/priviterag/aricent.git
 update your $CLASSPATH to add the jars in the libs subdir
 e.g.: export CLASSPATH=$CLASSPATH:/opt/aricent/libs/appserv-admin-2.1.jar:/opt/aricent/libs/appserv-deployment-client-2.1.jar:/opt/aricent/libs/appserv-ext-2.1.jar:/opt/aricent/libs/appserv-rt-2.1.jar:/opt/aricent/libs/imqjmsra-2.1.jar:/opt/aricent/libs/j3d-core-1.3.1.jar:/opt/aricent/libs/javaee-2.1.jar:/opt/aricent/libs/log4j-1.2.16.jar:/opt/aricent/libs/vecmath-1.3.1.jar:/opt/aricent/libs/vnd_core_api-10.2.7.jar:/opt/aricent/libs/vnd_entities.jar
 
+----------------------------------------------
+Configuration
+----------------------------------------------
+edit server_configuration.rb and change thr constants according your environment (do not touch METHODS)
+NAMESPACE = 'urn:AricentServer'
+HOST = 'localhost' # webservice host
+PORT = 2000 # webservice port
+VISHOST = HOST # Visionael NRM10 server
+VISPORT = 3700 # Visionael NRM10 server port
+
 
 
 
