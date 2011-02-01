@@ -18,7 +18,7 @@ begin
 		# Call remote service methods
 		# e.g. 'Cisco 12410 Router'
 		puts "searching: #{ARGV[0]}"
-		puts driver.find_device ARGV[0]
+		puts driver.FindDevice ARGV[0]
 	end
 rescue => err
    puts err.message

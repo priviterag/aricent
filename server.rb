@@ -28,7 +28,7 @@ class AricentServer < SOAP::RPC::StandaloneServer
 	# test method that invoke nmr10 server to search a device
 	# input		: name:string
 	# output	: OK:device_name || ER:NOT FOUND || EX:exception message
-	def find_device(name)
+	def FindDevice(name)
 		begin
 			q = Query.find(DetachedDevice.java_class).matching('name',name)
 			fr = @fa.find q
@@ -46,24 +46,32 @@ class AricentServer < SOAP::RPC::StandaloneServer
 	end
 
 	# stub method, echoes params back
-	def check_in(user_id, date, serial_number, part_number, vendor_part_number, depot_string, asset_tag, facebook_part_number)
+	def CheckIn(user_id, date, serial_number, part_number, vendor_part_number, depot_string, asset_tag, facebook_part_number)
 		"OK:#{user_id},#{date},#{serial_number},#{part_number},#{vendor_part_number},#{depot_string},#{asset_tag},#{facebook_part_number}"
 	end
 
 	# stub method, echoes params back
-	def check_out(user_id, date, serial_number, part_number, vendor_part_number, depot_string, asset_tag, facebook_part_number, failed_part_rma)
+	def CheckOut(user_id, date, serial_number, part_number, vendor_part_number, depot_string, asset_tag, facebook_part_number, failed_part_rma)
 		"OK:#{user_id},#{date},#{serial_number},#{part_number},#{vendor_part_number},#{depot_string},#{asset_tag},#{facebook_part_number},#{failed_part_rma}"
 	end
 
 	# stub method, echoes params back
-	def capture_failed_part(user_id, date, serial_number, part_number, vendor_part_number, depot_string, asset_tag, facebook_part_number, rma, parent_serial_number, parent_asset_tag)
+	def CaptureFailedPart(user_id, date, serial_number, part_number, vendor_part_number, depot_string, asset_tag, facebook_part_number, rma, parent_serial_number, parent_asset_tag)
 		"OK:#{user_id},#{date},#{serial_number},#{part_number},#{vendor_part_number},#{depot_string},#{asset_tag},#{facebook_part_number},#{rma},#{parent_serial_number},#{parent_asset_tag}"
 	end	
 
 	# stub method, echoes params back
-	def rma(user_id, date, serial_number, part_number, vendor_part_number, depot_string, asset_tag, facebook_part_number, rma, carrier_name, carrier_traking_number)
+	def RMA(user_id, date, serial_number, part_number, vendor_part_number, depot_string, asset_tag, facebook_part_number, rma, carrier_name, carrier_traking_number)
 		"OK:#{user_id},#{date},#{serial_number},#{part_number},#{vendor_part_number},#{depot_string},#{asset_tag},#{facebook_part_number},#{rma},#{carrier_name},#{carrier_traking_number}"
 	end
+
+	###################################################################
+	# private methods
+	###################################################################
+	private
+
+	
+
 end
 
 begin
