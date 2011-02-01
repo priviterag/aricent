@@ -9,13 +9,16 @@ java_import com.visionael.api.ApiFactory
 java_import com.visionael.api.vnd.query.Query
 java_import com.visionael.api.vfd.dto.equipment.DetachedDevice
 
+class ApplicationError < StandardError 
+end
+
 class AricentServer < SOAP::RPC::StandaloneServer
 	def initialize(*args)
 		super
-		@af = ApiFactory.new VISHOST, VISPORT
-		@fa = @af.getFacilityApi
 		@log.level = Logger::Severity::DEBUG
 		METHODS.each { |signature|	add_method(self, *signature) }
+		@af = ApiFactory.new VISHOST, VISPORT
+		@fa = @af.getFacilityApi
 	end
 
 	###################################################################
@@ -24,7 +27,7 @@ class AricentServer < SOAP::RPC::StandaloneServer
 
 	# test method that invoke nmr10 server to search a device
 	# input		: name:string
-	# output	: OK:device_name || KO:NOT FOUND || EX:exception message
+	# output	: OK:device_name || ER:NOT FOUND || EX:exception message
 	def find_device(name)
 		begin
 			q = Query.find(DetachedDevice.java_class).matching('name',name)
@@ -33,8 +36,10 @@ class AricentServer < SOAP::RPC::StandaloneServer
 			if !dev.nil?
 				"OK:#{dev.getName}"
 			else
-				'KO:NOT FOUND'
+				raise ApplicationError, "NOT FOUND"
 			end
+		rescue ApplicationError => e
+			"ER:#{e.message}"
 		rescue Exception => e
 			"EX:#{e.message}"
 		end
