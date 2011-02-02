@@ -8,6 +8,7 @@ require 'server_configuration'
 java_import com.visionael.api.ApiFactory
 java_import com.visionael.api.vnd.query.Query
 java_import com.visionael.api.vfd.dto.equipment.DetachedDevice
+java_import com.visionael.api.dto.DetachedEntity
 
 class ApplicationError < StandardError 
 end
@@ -46,8 +47,15 @@ class AricentServer < SOAP::RPC::StandaloneServer
 	end
 
 	# stub method, echoes params back
-	def CheckIn(user_id, date, serial_number, part_number, vendor_part_number, depot_string, asset_tag, facebook_part_number)
-		"OK:#{user_id},#{date},#{serial_number},#{part_number},#{vendor_part_number},#{depot_string},#{asset_tag},#{facebook_part_number}"
+	def CheckIn(user_id, date, serial_number, part_number, vendor_part_number, depot_string)
+		begin
+			
+			"OK:#{user_id},#{date},#{serial_number},#{part_number},#{vendor_part_number},#{depot_string}"
+		rescue ApplicationError => e
+			"ER:#{e.message}"
+		rescue Exception => e
+			"EX:#{e.message}"
+		end
 	end
 
 	# stub method, echoes params back
@@ -69,6 +77,10 @@ class AricentServer < SOAP::RPC::StandaloneServer
 	# private methods
 	###################################################################
 	private
+
+	def find_parent_by_path entity_path
+		
+	end
 
 	
 

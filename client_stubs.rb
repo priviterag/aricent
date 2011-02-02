@@ -13,7 +13,7 @@ begin
 	METHODS.each { |signature|	driver.add_method(*signature) }
 
 	puts 'invoking check_in...'
-	puts driver.CheckIn 'user_id', 'date', 'serial_number', 'part_number', 'vendor_part_number', 'depot_string', 'asset_tag', 'facebook_part_number'
+	puts driver.CheckIn 'user_id', 'date', 'serial_number', 'part_number', 'vendor_part_number', 'depot_string'
 
 	puts 'invoking check_out...'
 	puts 	driver.CheckOut 'user_id', 'date', 'serial_number', 'part_number', 'vendor_part_number', 'depot_string', 'asset_tag', 'facebook_part_number', 'failed_part_rma'
