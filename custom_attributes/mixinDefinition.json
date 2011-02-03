@@ -5,13 +5,12 @@
 					 "picklist" : ["CheckIn", "CheckOut", "Shipment of Failed Part to Vendor", "Capture Failed Part"] ,
            "noCopy": true
        },
-       "Name": {
+       "Description": {
            "type": "STRING",
            "noCopy": true
        },
        "Part number": {
-           "type": "STRING",
-           "noCopy": true
+           "type": "STRING"
        },
        "Serial number": {
            "type": "STRING",
@@ -19,11 +18,12 @@
        },
        "Asset tag": {
            "type": "STRING",
+           "index": true,
            "noCopy": true
        },
        "Facebook part number": {
            "type": "STRING",
-           "noCopy": true
+           "index": true
        },
        "Last op. user id": {
            "type": "STRING",
@@ -34,8 +34,10 @@
            "noCopy": true
        },
        "Vendor part number": {
-           "type": "STRING",
-           "noCopy": true
+           "type": "STRING"
+       },
+       "Vendor": {
+           "type": "STRING"
        },
        "Carrier name": {
            "type": "STRING",
@@ -58,7 +60,7 @@
            "noCopy": true
        },
        "Last op. date": {
-           "type": "DATETIME",
+           "type": "STRING",
            "noCopy": true
        }
    }

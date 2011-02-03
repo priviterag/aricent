@@ -8,6 +8,12 @@ require 'server_configuration'
 java_import com.visionael.api.ApiFactory
 java_import com.visionael.api.vnd.query.Query
 java_import com.visionael.api.vfd.dto.equipment.DetachedDevice
+java_import com.visionael.api.vfd.dto.equipment.DetachedRack
+java_import com.visionael.api.vfd.dto.facility.DetachedBayline
+java_import com.visionael.api.vfd.dto.facility.DetachedPlan
+java_import com.visionael.api.dto.DetachedEntity
+java_import com.visionael.api.vfd.library.LibrarySearchFilter
+
 
 class ApplicationError < StandardError 
 end
@@ -19,6 +25,7 @@ class AricentServer < SOAP::RPC::StandaloneServer
 		METHODS.each { |signature|	add_method(self, *signature) }
 		@af = ApiFactory.new VISHOST, VISPORT
 		@fa = @af.getFacilityApi
+		@la = @af.getLibraryApi
 	end
 
 	###################################################################
@@ -45,10 +52,49 @@ class AricentServer < SOAP::RPC::StandaloneServer
 		end
 	end
 
-	# stub method, echoes params back
-	def CheckIn(user_id, date, serial_number, part_number, vendor_part_number, depot_string, asset_tag, facebook_part_number)
-		"OK:#{user_id},#{date},#{serial_number},#{part_number},#{vendor_part_number},#{depot_string},#{asset_tag},#{facebook_part_number}"
-	end
+	# CheckIn 
+  # user_id                 : userid of the operator
+  # date                    : date of the operation
+  # serial_number           : spare serial number
+  # part_number             : part number used to lookup the spec in the library
+  # vendor_part_number      : ? same as part number 
+  # depot_string            : colon separated value of the spare container e.g. 'Spare Depot Plan:Bayline001:Rack25'
+  def CheckIn(user_id, date, serial_number, part_number, vendor_part_number, depot_string)
+	  begin
+	    #parent = find_entity_by_path depot_string
+	    parent = find_depot_placement depot_string.split(':').last
+	    raise ApplicationError, "Depot placement not found" if parent.nil?
+      
+      spare = add_spare part_number
+
+      #set custom attributes
+      mixin = get_mixin spare, 'Spares'
+      mixin.put 'Condition', 'CheckIn'
+      mixin.put 'Part number', part_number
+      mixin.put 'Serial number', serial_number
+      mixin.put 'Last op. user id', user_id
+      mixin.put 'Last op. date', date
+      mixin.put 'Vendor part number', vendor_part_number
+      @fa.saveMixinData(spare, mixin)		
+
+      #spare placement
+      placement = nil
+      if parent.java_kind_of? DetachedRack
+        placement = @fa.addChassisToRack(spare, parent, 100);
+      elsif parent.java_kind_of? DetachedPlan
+        placement = @fa.addItemToPlan(spare, parent, 60, 60, 0);
+      elsif parent.java_kind_of? DetachedBayline
+        placement = @fa.addItemToBayline(spare, parent, 4);
+      end
+      raise ApplicationError ,"Spare not positioned - bad spare placement" if placement.nil?
+
+		  "OK:#{user_id},#{date},#{serial_number},#{part_number},#{vendor_part_number},#{depot_string}"
+	  rescue ApplicationError => e
+		  "ER:#{e.message}"
+	  rescue Exception => e
+		  "EX:#{e.message}"
+	  end
+  end
 
 	# stub method, echoes params back
 	def CheckOut(user_id, date, serial_number, part_number, vendor_part_number, depot_string, asset_tag, facebook_part_number, failed_part_rma)
@@ -70,7 +116,64 @@ class AricentServer < SOAP::RPC::StandaloneServer
 	###################################################################
 	private
 
-	
+  def get_model(search_filter)
+    begin
+      spec_description_key = @la.findSpecDescriptions(search_filter)[0]
+      @fa.getModelFromLibraryKey(spec_description_key)
+    rescue Exception => e
+      return nil
+    end
+  end
+
+  def get_mixin entity, mixin_name
+    mixin = @fa.find(entity, Query.findRelatives("mixin:#{mixin_name}")).getRelatedEntities(entity, "mixin:#{mixin_name}").iterator.next
+  end
+
+  def find_entity_by_path entity_path
+    @fa.find(Query.find(DetachedRack.java_class).matching('name', entity_path)).getFirst
+  end
+
+  def find_depot_placement name
+    placement = nil
+    [
+      DetachedRack.java_class,
+      DetachedPlan.java_class,
+      DetachedBayline.java_class    
+    ].each { |klass| 
+      placement = @fa.find(Query.find(klass).matching('name', name)).getFirst
+      break if !placement.nil?
+    }
+    placement
+  end
+
+  def add_spare part_number
+    #find the spare chassis used to model all the spare parts
+    spare_model = get_model LibrarySearchFilter.createChassisFilter(SPAREDEVSPEC)
+    raise ApplicationError ,"SparePart model not found" if spare_model.nil?    
+
+    #find equipment model
+    equip_model = nil
+    [
+      LibrarySearchFilter.createChassisFilter(part_number),
+      LibrarySearchFilter.createCardFilter(part_number),
+      LibrarySearchFilter.createAdapterFilter(part_number),
+      LibrarySearchFilter.createPatchPanelFilter(part_number)
+    ].each { |filter| 
+      equip_model = get_model filter
+      break if !equip_model.nil?
+    }
+    #puts equip_model
+    raise ApplicationError ,"Equipment model not found" if equip_model.nil?    
+
+    spare = @fa.createChassis(spare_model, equip_model.getName)
+    raise ApplicationError ,"Spare not created" if spare.nil?
+
+    mixin = get_mixin spare, 'Spares'
+    mixin.put 'Description', equip_model.getDescription
+    @fa.saveMixinData(spare, mixin)		
+
+    spare
+  end
 
 end
 
