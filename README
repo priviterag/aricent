@@ -44,7 +44,7 @@ Installation
 $ git clone git://github.com/priviterag/aricent.git
 
 update your $CLASSPATH to add the jars in the libs subdir
-e.g.: export CLASSPATH=$CLASSPATH:/opt/aricent/libs/appserv-admin-2.1.jar:/opt/aricent/libs/appserv-deployment-client-2.1.jar:/opt/aricent/libs/appserv-ext-2.1.jar:/opt/aricent/libs/appserv-rt-2.1.jar:/opt/aricent/libs/imqjmsra-2.1.jar:/opt/aricent/libs/j3d-core-1.3.1.jar:/opt/aricent/libs/javaee-2.1.jar:/opt/aricent/libs/log4j-1.2.16.jar:/opt/aricent/libs/vecmath-1.3.1.jar:/opt/aricent/libs/vnd_core_api-10.2.7.jar:/opt/aricent/libs/vnd_entities.jar
+e.g.: export CLASSPATH=$CLASSPATH:/opt/aricent/libs/appserv-admin-2.1.jar:/opt/aricent/libs/appserv-deployment-client-2.1.jar:/opt/aricent/libs/appserv-ext-2.1.jar:/opt/aricent/libs/appserv-rt-2.1.jar:/opt/aricent/libs/imqjmsra-2.1.jar:/opt/aricent/libs/j3d-core-1.3.1.jar:/opt/aricent/libs/javaee-2.1.jar:/opt/aricent/libs/log4j-1.2.16.jar:/opt/aricent/libs/vecmath-1.3.1.jar:/opt/aricent/libs/vnd_core_api-10.3.0-SNAPSHOT.jar:/opt/aricent/libs/vnd_entities.jar
 
 
 ----------------------------------------------
@@ -65,14 +65,29 @@ HOST = 'localhost' # webservice host
 PORT = 2000 # webservice port
 VISHOST = HOST # Visionael NRM10 server
 VISPORT = 3700 # Visionael NRM10 server port
+SPAREDEVSPEC = 'SparePart'
 
 METHODS=[
 	%w(FindDevice name),
-	%w(CheckIn user_id date serial_number part_number vendor_part_number depot_string asset_tag facebook_part_number),
+	%w(CheckIn user_id date serial_number part_number vendor_part_number depot_string),
 	%w(CheckOut user_id date serial_number part_number vendor_part_number depot_string asset_tag facebook_part_number failed_part_rma),
 	%w(CaptureFailedPart user_id date serial_number part_number vendor_part_number depot_string asset_tag facebook_part_number rma parent_serial_number parent_asset_tag),
 	%w(RMA user_id date serial_number part_number vendor_part_number depot_string asset_tag facebook_part_number rma carrier_name carrier_traking_number)
 ]
+
+
+----------------------------------------------
+Spares model creation
+----------------------------------------------
+Log in into NRM and go to the 'Equiment Library' application
+create a new Chassis with the following attributes
+name    : SparePart
+vendor  : Spares
+subtype : SparePart
+width   : 30
+depth   : 30
+height  : 10
+descr.  : Spare part model used by the Aricent demo
 
 
 ----------------------------------------------
@@ -84,6 +99,8 @@ $ ./server.rb #start the webservice
 $ ./client_find_device 'Cisco 12410 Router' # this device is in the nmr10 sample repository
 
 $ ./client_stubs.rb # call the stubs methods defined in the nrm8 version of the facebook application
+
+$ ./client_checkin.rb # call the checkin method. edit the file to change the parameters. 
 
 
 ----------------------------------------------

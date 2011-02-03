@@ -87,11 +87,11 @@ class AricentServer < SOAP::RPC::StandaloneServer
       end
       raise ApplicationError ,"Spare not positioned - bad spare placement" if placement.nil?
 
-		  "OK:#{user_id},#{date},#{serial_number},#{part_number},#{vendor_part_number},#{depot_string}"
+		  "SUCCESS"
 	  rescue ApplicationError => e
-		  "ER:#{e.message}"
+		  "FAILURE: APPLICATION ERROR - #{e.message}"
 	  rescue Exception => e
-		  "EX:#{e.message}"
+		  "FAILURE: EXCEPTION - #{e.message}"
 	  end
   end
 
@@ -150,7 +150,7 @@ class AricentServer < SOAP::RPC::StandaloneServer
     spare_model = get_model LibrarySearchFilter.createChassisFilter(SPAREDEVSPEC)
     raise ApplicationError ,"SparePart model not found" if spare_model.nil?    
 
-    #find equipment model
+    #find equipment model. here we are trying on several types since we know only the part_no
     equip_model = nil
     [
       LibrarySearchFilter.createChassisFilter(part_number),
@@ -161,10 +161,9 @@ class AricentServer < SOAP::RPC::StandaloneServer
       equip_model = get_model filter
       break if !equip_model.nil?
     }
-    #puts equip_model
     raise ApplicationError ,"Equipment model not found" if equip_model.nil?    
 
-    spare = @fa.createChassis(spare_model, equip_model.getName)
+    spare = @fa.createChassis(spare_model, "#{equip_model.getName} - spare equipment")
     raise ApplicationError ,"Spare not created" if spare.nil?
 
     mixin = get_mixin spare, 'Spares'
