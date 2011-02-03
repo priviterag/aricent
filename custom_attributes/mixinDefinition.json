@@ -9,6 +9,10 @@
            "type": "STRING",
            "noCopy": true
        },
+       "Position": {
+           "type": "STRING",
+           "noCopy": true
+       },
        "Part number": {
            "type": "STRING"
        },

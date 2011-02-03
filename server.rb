@@ -61,7 +61,9 @@ class AricentServer < SOAP::RPC::StandaloneServer
   def CheckIn(user_id, date, serial_number, part_number, vendor_part_number, depot_string)
 	  begin
 	    #parent = find_entity_by_path depot_string
-	    parent = find_depot_placement depot_string.split(':').last
+	    depot_string = depot_string.split(':').reverse
+      position = depot_string.delete_at(0)
+	    parent = find_depot_placement depot_string.first
 	    raise ApplicationError, "Depot placement not found" if parent.nil?
       
       spare = add_spare part_number
@@ -74,6 +76,7 @@ class AricentServer < SOAP::RPC::StandaloneServer
       mixin.put 'Last op. user id', user_id
       mixin.put 'Last op. date', date
       mixin.put 'Vendor part number', vendor_part_number
+      mixin.put 'Position', position
       @fa.saveMixinData(spare, mixin)		
 
       #spare placement
