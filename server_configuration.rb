@@ -3,6 +3,7 @@ HOST = 'localhost' # webservice host
 PORT = 2000 # webservice port
 VISHOST = HOST # Visionael NRM10 server
 VISPORT = 3700 # Visionael NRM10 server port
+SPAREDEVSPEC = 'SparePart'
 
 METHODS=[
 	%w(FindDevice name),
