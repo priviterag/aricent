@@ -14,9 +14,9 @@ begin
 
   puts "checkin spare part  - serial_number sn111:#{driver.CheckIn('giuseppe', '02/03/11 12:11', 'sn111', '3C63100-AC-C', '3C63100-AC-C', 'depot01-bay003-Utility Cabinet-001:AA-1', 'at111', 'fb111')}" 
   puts "checkin spare part  - serial_number sn222:#{driver.CheckIn('giuseppe', '02/03/11 12:11', 'sn222', '3C63100-AC-C', '3C63100-AC-C', 'depot01-bay003-Utility Cabinet-001:AA-1', 'at222', 'fb222')}" 
-  puts "checkout spare part - serial_number sn111:#{driver.CheckOut('giuseppe', '02/03/11 12:11', 'sn111', '3C63100-AC-C', '3C63100-AC-C', 'depot01-bay003-Utility Cabinet-001:AA-1', 'at111' , 'fb111', '')}" 
+  puts "checkout spare part - serial_number sn111:#{driver.CheckOut('giuseppe', '02/03/11 12:11', 'sn111', '3C63100-AC-C', '3C63100-AC-C', 'depot01-bay003-Utility Cabinet-001:AA-1')}" 
   puts "capture failed part - serial_number sn111:#{driver.CaptureFailedPart('giuseppe', '02/03/11 12:11', 'sn111', '3C63100-AC-C', '3C63100-AC-C', 'depot01-bay003-Utility Cabinet-001:AA-3', 'at111', 'fb111', 'rma111', 'psn123', 'pas123')}" 
-  puts "checkout spare part - serial_number sn222:#{driver.CheckOut('giuseppe', '02/03/11 12:11', 'sn222', '3C63100-AC-C', '3C63100-AC-C', 'depot01-bay003-Utility Cabinet-001:AA-1', 'at111' , 'fb111', 'rma111')}" 
+  puts "checkout spare part - serial_number sn222:#{driver.CheckOut('giuseppe', '02/03/11 12:11', 'sn222', '3C63100-AC-C', '3C63100-AC-C', 'depot01-bay003-Utility Cabinet-001:AA-1')}" 
   puts "rma spare part      - serial_number sn111:#{driver.RMA('giuseppe', '02/03/11 12:11', 'sn111', '3C63100-AC-C', '3C63100-AC-C', 'depot01-bay003-Utility Cabinet-001:AA-3', 'at111', 'fb111', 'rma111', 'UPS', 'UPS-tn123456')}" 
   
 rescue => err

@@ -76,6 +76,8 @@ class AricentServer < SOAP::RPC::StandaloneServer
       mixin.put 'Last op. date', date
       mixin.put 'Vendor part number', vendor_part_number
       mixin.put 'Position', depot_string.split(':').reverse.first #take the last token of the depot_string
+      mixin.put 'Asset tag', asset_tag
+      mixin.put 'Facebook part number', facebook_part_number
       @fa.saveMixinData(spare, mixin)		
 
       #spare placement
@@ -97,7 +99,7 @@ class AricentServer < SOAP::RPC::StandaloneServer
 	  end
   end
 
-  def CheckOut(user_id, date, serial_number, part_number, vendor_part_number, depot_string, asset_tag, facebook_part_number, failed_part_rma)
+  def CheckOut(user_id, date, serial_number, part_number, vendor_part_number, depot_string)
     begin
       parent = find_depot_placement depot_string
       raise ApplicationError, "Depot placement not found" if parent.nil?
@@ -114,9 +116,6 @@ class AricentServer < SOAP::RPC::StandaloneServer
       mixin.put 'Last op. date', date
       mixin.put 'Condition', 'CheckOut'
       mixin.put 'Vendor part number', vendor_part_number
-      mixin.put 'Facebook part number', facebook_part_number
-      mixin.put 'Asset tag', asset_tag
-      mixin.put 'Failed part RMA', failed_part_rma
       @fa.saveMixinData(spare, mixin)		
       
       "SUCCESS"    
@@ -133,8 +132,7 @@ class AricentServer < SOAP::RPC::StandaloneServer
       raise ApplicationError, "Depot placement not found" if parent.nil?
       
       #search the spare first for serial number and, if not found, for part number
-      result = find_entities_by_mixin( DetachedChassis.java_class, 'Spares', [['Serial number',serial_number],['Condition','CheckIn']] )
-      result = find_entities_by_mixin( DetachedChassis.java_class, 'Spares', [['Part number',part_number],['Condition','CheckIn']] ) if result.empty?
+      result = find_entities_by_mixin( DetachedChassis.java_class, 'Spares', [['Serial number',serial_number],['Condition','CheckOut']] )
       raise ApplicationError, "Spare part not found" if result.empty?
       spare = result.iterator.next
       
@@ -158,9 +156,6 @@ class AricentServer < SOAP::RPC::StandaloneServer
 
   def RMA(user_id, date, serial_number, part_number, vendor_part_number, depot_string, asset_tag, facebook_part_number, rma, carrier_name, carrier_tracking_number)
     begin
-      parent = find_depot_placement depot_string
-      raise ApplicationError, "Depot placement not found" if parent.nil?
-      
       #search the spare by RMA 
       result = find_entities_by_mixin( DetachedChassis.java_class, 'Spares', [['RMA',rma],['Condition','Capture Failed Part']] )
       raise ApplicationError, "Spare part not found" if result.empty?
