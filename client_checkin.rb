@@ -13,7 +13,7 @@ begin
 	METHODS.each { |signature|	driver.add_method(*signature) }
 
 	puts 'invoking check_in...'
-	puts driver.CheckIn 'giuseppe', '02/03/11 12:11', 'sn123456', '3C63100-AC-C', '3C63100-AC-C', 'depot01-bay003-Utility Cabinet-001:Pos AA1'
+	puts driver.CheckIn 'giuseppe', '02/03/11 12:11', 'sn123456', '56-10327', '56-10327', 'depot01-bay003-Utility Cabinet-001:Pos AA1'
 
 rescue => err
    puts err.message

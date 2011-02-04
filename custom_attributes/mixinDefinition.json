@@ -3,6 +3,7 @@
        "Condition": {
            "type": "STRING",
 					 "picklist" : ["CheckIn", "CheckOut", "Shipment of Failed Part to Vendor", "Capture Failed Part"] ,
+           "index": true,
            "noCopy": true
        },
        "Description": {
@@ -18,6 +19,7 @@
        },
        "Serial number": {
            "type": "STRING",
+           "index": true,
            "noCopy": true
        },
        "Asset tag": {
@@ -53,6 +55,7 @@
        },
        "RMA": {
            "type": "STRING",
+           "index": true,
            "noCopy": true
        },
        "Parent serial number": {

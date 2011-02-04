@@ -8,6 +8,7 @@ require 'server_configuration'
 java_import com.visionael.api.ApiFactory
 java_import com.visionael.api.vnd.query.Query
 java_import com.visionael.api.vfd.dto.equipment.DetachedDevice
+java_import com.visionael.api.vfd.dto.equipment.DetachedChassis
 java_import com.visionael.api.vfd.dto.equipment.DetachedRack
 java_import com.visionael.api.vfd.dto.facility.DetachedBayline
 java_import com.visionael.api.vfd.dto.facility.DetachedPlan
@@ -57,13 +58,11 @@ class AricentServer < SOAP::RPC::StandaloneServer
   # serial_number           : spare serial number
   # part_number             : part number used to lookup the spec in the library
   # vendor_part_number      : ? same as part number 
-  # depot_string            : colon separated value of the spare container e.g. 'Spare Depot Plan:Bayline001:Rack25'
-  def CheckIn(user_id, date, serial_number, part_number, vendor_part_number, depot_string)
+  # depot_string            : colon separated value of the spare container e.g. 'Spare Depot Plan:Bayline001:Rack25:Pos AA-1'
+  def CheckIn(user_id, date, serial_number, part_number, vendor_part_number, depot_string, asset_tag, facebook_part_number)
 	  begin
 	    #parent = find_entity_by_path depot_string
-	    depot_string = depot_string.split(':').reverse
-      position = depot_string.delete_at(0)
-	    parent = find_depot_placement depot_string.first
+	    parent = find_depot_placement depot_string
 	    raise ApplicationError, "Depot placement not found" if parent.nil?
       
       spare = add_spare part_number
@@ -76,7 +75,7 @@ class AricentServer < SOAP::RPC::StandaloneServer
       mixin.put 'Last op. user id', user_id
       mixin.put 'Last op. date', date
       mixin.put 'Vendor part number', vendor_part_number
-      mixin.put 'Position', position
+      mixin.put 'Position', depot_string.split(':').reverse.first #take the last token of the depot_string
       @fa.saveMixinData(spare, mixin)		
 
       #spare placement
@@ -98,25 +97,109 @@ class AricentServer < SOAP::RPC::StandaloneServer
 	  end
   end
 
-	# stub method, echoes params back
-	def CheckOut(user_id, date, serial_number, part_number, vendor_part_number, depot_string, asset_tag, facebook_part_number, failed_part_rma)
-		"OK:#{user_id},#{date},#{serial_number},#{part_number},#{vendor_part_number},#{depot_string},#{asset_tag},#{facebook_part_number},#{failed_part_rma}"
-	end
+  def CheckOut(user_id, date, serial_number, part_number, vendor_part_number, depot_string, asset_tag, facebook_part_number, failed_part_rma)
+    begin
+      parent = find_depot_placement depot_string
+      raise ApplicationError, "Depot placement not found" if parent.nil?
+      
+      #search the spare first for serial number and, if not found, for part number
+      result = find_entities_by_mixin( DetachedChassis.java_class, 'Spares', [['Serial number',serial_number],['Condition','CheckIn']] )
+      result = find_entities_by_mixin( DetachedChassis.java_class, 'Spares', [['Part number',part_number],['Condition','CheckIn']] ) if result.empty?
+      raise ApplicationError, "Spare part not found" if result.empty?
+      spare = result.iterator.next
 
-	# stub method, echoes params back
-	def CaptureFailedPart(user_id, date, serial_number, part_number, vendor_part_number, depot_string, asset_tag, facebook_part_number, rma, parent_serial_number, parent_asset_tag)
-		"OK:#{user_id},#{date},#{serial_number},#{part_number},#{vendor_part_number},#{depot_string},#{asset_tag},#{facebook_part_number},#{rma},#{parent_serial_number},#{parent_asset_tag}"
-	end	
+      #set custom attributes
+      mixin = get_mixin spare, 'Spares'
+      mixin.put 'Last op. user id', user_id
+      mixin.put 'Last op. date', date
+      mixin.put 'Condition', 'CheckOut'
+      mixin.put 'Vendor part number', vendor_part_number
+      mixin.put 'Facebook part number', facebook_part_number
+      mixin.put 'Asset tag', asset_tag
+      mixin.put 'Failed part RMA', failed_part_rma
+      @fa.saveMixinData(spare, mixin)		
+      
+      "SUCCESS"    
+    rescue ApplicationError => e
+	    "FAILURE: APPLICATION ERROR - #{e.message}"
+    rescue Exception => e
+	    "FAILURE: EXCEPTION - #{e.message}"
+    end
+  end
 
-	# stub method, echoes params back
-	def RMA(user_id, date, serial_number, part_number, vendor_part_number, depot_string, asset_tag, facebook_part_number, rma, carrier_name, carrier_traking_number)
-		"OK:#{user_id},#{date},#{serial_number},#{part_number},#{vendor_part_number},#{depot_string},#{asset_tag},#{facebook_part_number},#{rma},#{carrier_name},#{carrier_traking_number}"
-	end
+  def CaptureFailedPart(user_id, date, serial_number, part_number, vendor_part_number, depot_string, asset_tag, facebook_part_number, rma, parent_serial_number, parent_asset_tag)
+    begin
+      parent = find_depot_placement depot_string
+      raise ApplicationError, "Depot placement not found" if parent.nil?
+      
+      #search the spare first for serial number and, if not found, for part number
+      result = find_entities_by_mixin( DetachedChassis.java_class, 'Spares', [['Serial number',serial_number],['Condition','CheckIn']] )
+      result = find_entities_by_mixin( DetachedChassis.java_class, 'Spares', [['Part number',part_number],['Condition','CheckIn']] ) if result.empty?
+      raise ApplicationError, "Spare part not found" if result.empty?
+      spare = result.iterator.next
+      
+      #set custom attributes
+      mixin = get_mixin spare, 'Spares'
+      mixin.put 'Last op. user id', user_id
+      mixin.put 'Last op. date', date
+      mixin.put 'Condition', 'Capture Failed Part'
+      mixin.put 'RMA', rma
+      mixin.put 'Parent serial number', parent_serial_number
+      mixin.put 'Parent asset tag', parent_asset_tag
+      @fa.saveMixinData(spare, mixin)		
+      
+      "SUCCESS"    
+    rescue ApplicationError => e
+	    "FAILURE: APPLICATION ERROR - #{e.message}"
+    rescue Exception => e
+	    "FAILURE: EXCEPTION - #{e.message}"
+    end
+  end	
+
+  def RMA(user_id, date, serial_number, part_number, vendor_part_number, depot_string, asset_tag, facebook_part_number, rma, carrier_name, carrier_tracking_number)
+    begin
+      parent = find_depot_placement depot_string
+      raise ApplicationError, "Depot placement not found" if parent.nil?
+      
+      #search the spare by RMA 
+      result = find_entities_by_mixin( DetachedChassis.java_class, 'Spares', [['RMA',rma],['Condition','Capture Failed Part']] )
+      raise ApplicationError, "Spare part not found" if result.empty?
+      spare = result.iterator.next
+
+      #set custom attributes
+      mixin = get_mixin spare, 'Spares'
+      mixin.put 'Last op. user id', user_id
+      mixin.put 'Last op. date', date
+      mixin.put 'Condition', 'Shipment of Failed Part to Vendor'
+      mixin.put 'Carrier name', carrier_name
+      mixin.put 'Carrier tracking number', carrier_tracking_number
+      mixin.put 'Vendor part number', vendor_part_number
+      mixin.put 'Facebook part number', facebook_part_number
+      @fa.saveMixinData(spare, mixin)		
+      
+      "SUCCESS"    
+    rescue ApplicationError => e
+	    "FAILURE: APPLICATION ERROR - #{e.message}"
+    rescue Exception => e
+	    "FAILURE: EXCEPTION - #{e.message}"
+    end
+  end
 
 	###################################################################
 	# private methods
 	###################################################################
 	private
+
+  def find_entities_by_mixin klass, mixin, conditions
+    condition = conditions.delete_at 0
+    @fa.find(
+      Query.find(klass).having(
+        conditions.inject(Query.findRelatives("mixin:#{mixin}").matching(condition[0], condition[1])) { |query, condition|  
+          query = query.and().matching(condition[0], condition[1])
+        }
+      )
+    ).getRootEntities
+  end
 
   def get_model(search_filter)
     begin
@@ -135,7 +218,10 @@ class AricentServer < SOAP::RPC::StandaloneServer
     @fa.find(Query.find(DetachedRack.java_class).matching('name', entity_path)).getFirst
   end
 
-  def find_depot_placement name
+  def find_depot_placement depot_string
+    tokens = depot_string.split(':').reverse
+    tokens.delete_at 0 #remove the position
+    name = tokens.first #take only the name of the rack
     placement = nil
     [
       DetachedRack.java_class,
@@ -166,7 +252,7 @@ class AricentServer < SOAP::RPC::StandaloneServer
     }
     raise ApplicationError ,"Equipment model not found" if equip_model.nil?    
 
-    spare = @fa.createChassis(spare_model, "#{equip_model.getName} - spare equipment")
+    spare = @fa.createChassis(spare_model, "#{equip_model.getName}")
     raise ApplicationError ,"Spare not created" if spare.nil?
 
     mixin = get_mixin spare, 'Spares'
